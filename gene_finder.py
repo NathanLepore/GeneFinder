@@ -1,14 +1,17 @@
     # -*- coding: utf-8 -*-
 """
-YOUR HEADER COMMENT HERE
+Here is my gene finder script. It works but it takes a long time to run the salmonella gene. 
 
-@author: YOUR NAME HERE
+@author: Nathan Lepore
 
 """
 
 import random
 from amino_acids import aa, codons, aa_table   # you may find these useful
+
 from load import load_seq
+dna = load_seq("./data/X73525.fa")
+
 
 
 def shuffle_string(s):
@@ -122,8 +125,6 @@ def find_all_ORFs_oneframe(dna):
     return ORF
 
 
-
-
 def find_all_ORFs(dna):
     """ Finds all non-nested open reading frames in the given DNA sequence in
         all 3 possible frames and returns them as a list.  By non-nested we
@@ -162,6 +163,7 @@ def find_all_ORFs_both_strands(dna):
     ORF = ORF + find_all_ORFs(dna)
     return ORF
 
+
 def longest_ORF(dna):
     """ Finds the longest ORF on both strands of the specified DNA and returns it
         as a string
@@ -169,7 +171,16 @@ def longest_ORF(dna):
     'ATGCTACATTCGCAT'
     """
     # TODO: implement this
-    pass
+
+    ORFS = find_all_ORFs_both_strands(dna)
+    length = len(ORFS)
+    ORFlength = 0
+    for i in range(length):
+        compare = ORFlength
+        ORFlength = len(ORFS[i])
+        if ORFlength > compare:
+            final = ORFS[i]
+    return final
 
 
 def longest_ORF_noncoding(dna, num_trials):
@@ -181,6 +192,15 @@ def longest_ORF_noncoding(dna, num_trials):
         returns: the maximum length longest ORF """
     # TODO: implement this
     pass
+    ORFlength = 0
+    for i in range(num_trials):
+        dna = shuffle_string(dna)
+        compare = ORFlength
+        ORF = longest_ORF(dna)
+        ORFlength = len(ORF)
+        if ORFlength > compare:
+            final = ORF
+    return final
 
 
 def coding_strand_to_AA(dna):
@@ -200,6 +220,21 @@ def coding_strand_to_AA(dna):
     # TODO: implement this
     pass
 
+    length = len(dna)
+    fix_length = length % 3
+    # dna = dna[0:length-fix_length]
+    aalength = int(length/3)
+    aa = list(' '*aalength)
+    i = 0
+    from amino_acids import aa_table
+    while i < length - fix_length:
+        codon = dna[i:i+3]
+        amino_acid = aa_table[codon]
+        aa[int(i/3)] = amino_acid
+        i = i+3
+    aa = ''.join(aa)
+    return aa
+
 
 def gene_finder(dna):
     """ Returns the amino acid sequences that are likely coded by the specified dna
@@ -209,8 +244,18 @@ def gene_finder(dna):
     """
     # TODO: implement this
     pass
+    ORFS = find_all_ORFs_both_strands(dna)
+    length = len(ORFS)
+    sequence = list(length*' ')
+    for i in range(length):
+        sequence[i] = coding_strand_to_AA(ORFS[i])
+    return sequence
 
-if __name__ == "__main__":
-    import doctest
-    doctest.run_docstring_examples(find_all_ORFs_both_strands, globals(),
-                                   verbose=True)
+
+print(gene_finder(dna))
+
+
+# if __name__ == "__main__":
+# import doctest
+# doctest.run_docstring_examples(gene_finder, globals(),
+#                               verbose=True)
